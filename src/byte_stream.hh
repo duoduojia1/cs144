@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <string_view>
-
+#include <queue>
 class Reader;
 class Writer;
 
@@ -22,9 +22,14 @@ public:
   bool has_error() const { return error_; }; // Has the stream had an error?
 
 protected:
-  // Please add any additional state to the ByteStream here, and not to the Writer and Reader interfaces.
+  // Please add any additional state to the ByteStream here, and not to the Writer and Reader interfaces.    // total
+  uint64_t cur_capacity_; // cur_bytes..
+  uint64_t writer_size_;  // write total
+  uint64_t reader_size_;  // read total
   uint64_t capacity_;
   bool error_ {};
+  bool is_close_;
+  std::deque<char> _dq;
 };
 
 class Writer : public ByteStream
