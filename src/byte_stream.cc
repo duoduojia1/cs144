@@ -38,6 +38,10 @@ uint64_t Writer::available_capacity() const
   return capacity_ - cur_capacity_;
 }
 
+uint64_t Writer::get_capacity() const
+{
+  return capacity_;
+}
 uint64_t Writer::bytes_pushed() const
 {
   // Your code here.

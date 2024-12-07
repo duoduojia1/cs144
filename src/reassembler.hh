@@ -14,7 +14,7 @@ class Reassembler
 public:
   // Construct Reassembler to write into given ByteStream.
   explicit Reassembler( ByteStream&& output ) : output_( std::move( output ) ), pending_size(0),
-  byte_record(0),is_end(false),st{{inf, 0, ""}}{}
+  byte_record(0), capacity_(output_.writer().get_capacity()),end_byte(0),is_end(false){}
   /*
    * Insert a new substring to be reassembled into a ByteStream.
    *   `first_index`: the index of the first byte of the substring
@@ -39,15 +39,13 @@ public:
 
   // How many bytes are stored in the Reassembler itself?
   uint64_t bytes_pending() const;
-
   // Access output stream reader
   Reader& reader() { return output_.reader(); }
   const Reader& reader() const { return output_.reader(); }
 
   // Access output stream writer, but const-only (can't write from outside)
   const Writer& writer() const { return output_.writer(); }
-
-private:
+ private:
     struct seg_node{
       uint64_t begin = 0;
       uint64_t siz = 0;
@@ -55,11 +53,15 @@ private:
       bool operator<(const seg_node &other) const {
         return this->begin < other.begin;
       };
-    };  
+    }; 
+public:
+  static long jug_block(seg_node& a, const seg_node& b);
 private:
   ByteStream output_; // the Reassembler writes to this ByteStream
   uint64_t pending_size; 
   uint64_t byte_record;
+  uint64_t capacity_;
+  uint64_t end_byte;
   //uint64_t Max_capacity_stream; //?
   bool is_end;
   std::set<seg_node> st;
