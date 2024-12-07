@@ -1,8 +1,9 @@
 #include "byte_stream.hh"
-
+#include <iostream>
 using namespace std;
 
-ByteStream::ByteStream( uint64_t capacity ) : capacity_( capacity ) {}
+ByteStream::ByteStream( uint64_t capacity ) : capacity_( capacity ), cur_capacity_( 0 ),
+ writer_size_(0),reader_size_(0), is_close_( false ), _dq(){}
 
 bool Writer::is_closed() const
 {
@@ -39,13 +40,13 @@ uint64_t Writer::available_capacity() const
 
 uint64_t Writer::bytes_pushed() const
 {
- // Your code here.
+  // Your code here.
   return writer_size_;
 }
 
 bool Reader::is_finished() const
 {
-   // Your code here.
+  // Your code here.
   return ( !cur_capacity_ ) && ( is_close_ );
 }
 
@@ -57,7 +58,7 @@ uint64_t Reader::bytes_popped() const
 
 string_view Reader::peek() const
 {
-   // Your code here.
+  // Your code here.
   std::string_view view( &_dq.front(), 1 );
   return view;
 }

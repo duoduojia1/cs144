@@ -1,13 +1,20 @@
 #pragma once
 
 #include "byte_stream.hh"
-
+#include <map>
+#include <queue>
+#include <vector>
+#include <utility>
+#include <set>
+#include <cstring>
+#include <iostream>
+const uint64_t inf = 2e18;
 class Reassembler
 {
 public:
   // Construct Reassembler to write into given ByteStream.
-  explicit Reassembler( ByteStream&& output ) : output_( std::move( output ) ) {}
-
+  explicit Reassembler( ByteStream&& output ) : output_( std::move( output ) ), pending_size(0),
+  byte_record(0),is_end(false),st{{inf, 0, ""}}{}
   /*
    * Insert a new substring to be reassembled into a ByteStream.
    *   `first_index`: the index of the first byte of the substring
@@ -41,5 +48,19 @@ public:
   const Writer& writer() const { return output_.writer(); }
 
 private:
+    struct seg_node{
+      uint64_t begin = 0;
+      uint64_t siz = 0;
+      std::string str;
+      bool operator<(const seg_node &other) const {
+        return this->begin < other.begin;
+      };
+    };  
+private:
   ByteStream output_; // the Reassembler writes to this ByteStream
+  uint64_t pending_size; 
+  uint64_t byte_record;
+  //uint64_t Max_capacity_stream; //?
+  bool is_end;
+  std::set<seg_node> st;
 };
