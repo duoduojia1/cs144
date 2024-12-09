@@ -8,7 +8,8 @@ class TCPReceiver
 {
 public:
   // Construct with given Reassembler
-  explicit TCPReceiver( Reassembler&& reassembler ) : reassembler_( std::move( reassembler ) ), offset_rand_(0){}
+  explicit TCPReceiver( Reassembler&& reassembler ) : reassembler_( std::move( reassembler ) ), offset_rand_(0),
+  has_syn(false) {}
 
   /*
    * The TCPReceiver receives TCPSenderMessages, inserting their payload into the Reassembler
@@ -25,8 +26,11 @@ public:
   const Reader& reader() const { return reassembler_.reader(); }
   const Writer& writer() const { return reassembler_.writer(); }
   const Wrap32& get_offset_rand() const { return offset_rand_; }
+  const bool& get_syn() const { return has_syn; }
+  // const bool& get_fin() const { return has_fin; }
   void set_offset_rand( Wrap32 offset_rand ) { this->offset_rand_ = offset_rand; }
 private:
   Reassembler reassembler_;
   Wrap32 offset_rand_ ;
+  bool has_syn;
 };
