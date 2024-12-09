@@ -3,12 +3,12 @@
 #include "reassembler.hh"
 #include "tcp_receiver_message.hh"
 #include "tcp_sender_message.hh"
-
+#include "wrapping_integers.hh"
 class TCPReceiver
 {
 public:
   // Construct with given Reassembler
-  explicit TCPReceiver( Reassembler&& reassembler ) : reassembler_( std::move( reassembler ) ) {}
+  explicit TCPReceiver( Reassembler&& reassembler ) : reassembler_( std::move( reassembler ) ), offset_rand_(0){}
 
   /*
    * The TCPReceiver receives TCPSenderMessages, inserting their payload into the Reassembler
@@ -24,7 +24,9 @@ public:
   Reader& reader() { return reassembler_.reader(); }
   const Reader& reader() const { return reassembler_.reader(); }
   const Writer& writer() const { return reassembler_.writer(); }
-
+  const Wrap32& get_offset_rand() const { return offset_rand_; }
+  void set_offset_rand( Wrap32 offset_rand ) { this->offset_rand_ = offset_rand; }
 private:
   Reassembler reassembler_;
+  Wrap32 offset_rand_ ;
 };

@@ -56,6 +56,7 @@ public:
     }; 
 public:
   static long jug_block(seg_node& a, const seg_node& b);
+  uint64_t get_byte_record() const { return byte_record; }
 private:
   ByteStream output_; // the Reassembler writes to this ByteStream
   uint64_t pending_size; 
