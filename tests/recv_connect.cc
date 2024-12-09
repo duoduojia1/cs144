@@ -14,65 +14,65 @@ using namespace std;
 int main()
 {
   try {
-    // {
-    //   TCPReceiverTestHarness test { "connect 1", 4000 };
-    //   test.execute( ExpectWindow { 4000 } );
-    //   test.execute( ExpectAckno { std::optional<Wrap32> {} } );
-    //   test.execute( BytesPending { 0 } );
-    //   test.execute( BytesPushed { 0 } );
-    //   test.execute( SegmentArrives {}.with_syn().with_seqno( 0 ) );
-    //   test.execute( ExpectAckno { Wrap32 { 1 } } );
-    //   test.execute( BytesPending { 0 } );
-    //   test.execute( BytesPushed { 0 } );
-    // }
+    {
+      TCPReceiverTestHarness test { "connect 1", 4000 };
+      test.execute( ExpectWindow { 4000 } );
+      test.execute( ExpectAckno { std::optional<Wrap32> {} } );
+      test.execute( BytesPending { 0 } );
+      test.execute( BytesPushed { 0 } );
+      test.execute( SegmentArrives {}.with_syn().with_seqno( 0 ) );
+      test.execute( ExpectAckno { Wrap32 { 1 } } );
+      test.execute( BytesPending { 0 } );
+      test.execute( BytesPushed { 0 } );
+    }
 
-    // {
-    //   TCPReceiverTestHarness test { "connect 2", 5435 };
-    //   test.execute( ExpectAckno { std::optional<Wrap32> {} } );
-    //   test.execute( BytesPending { 0 } );
-    //   test.execute( BytesPushed { 0 } );
-    //   test.execute( SegmentArrives {}.with_syn().with_seqno( 89347598 ) );
-    //   test.execute( ExpectAckno { Wrap32 { 89347599 } } );
-    //   test.execute( BytesPending { 0 } );
-    //   test.execute( BytesPushed { 0 } );
-    // }
+    {
+      TCPReceiverTestHarness test { "connect 2", 5435 };
+      test.execute( ExpectAckno { std::optional<Wrap32> {} } );
+      test.execute( BytesPending { 0 } );
+      test.execute( BytesPushed { 0 } );
+      test.execute( SegmentArrives {}.with_syn().with_seqno( 89347598 ) );
+      test.execute( ExpectAckno { Wrap32 { 89347599 } } );
+      test.execute( BytesPending { 0 } );
+      test.execute( BytesPushed { 0 } );
+    }
 
-    // {
-    //   TCPReceiverTestHarness test { "connect 3", 5435 };
-    //   test.execute( ExpectAckno { std::optional<Wrap32> {} } );
-    //   test.execute( BytesPending { 0 } );
-    //   test.execute( BytesPushed { 0 } );
-    //   test.execute( SegmentArrives {}.with_seqno( 893475 ).without_ackno() );
-    //   test.execute( ExpectAckno { std::optional<Wrap32> {} } );
-    //   test.execute( BytesPending { 0 } );
-    //   test.execute( BytesPushed { 0 } );
-    // }
+    {
+      TCPReceiverTestHarness test { "connect 3", 5435 };
+      test.execute( ExpectAckno { std::optional<Wrap32> {} } );
+      test.execute( BytesPending { 0 } );
+      test.execute( BytesPushed { 0 } );
+      test.execute( SegmentArrives {}.with_seqno( 893475 ).without_ackno() );
+      test.execute( ExpectAckno { std::optional<Wrap32> {} } );
+      test.execute( BytesPending { 0 } );
+      test.execute( BytesPushed { 0 } );
+    }
 
-    // {
-    //   TCPReceiverTestHarness test { "connect 4", 5435 };
-    //   test.execute( ExpectAckno { std::optional<Wrap32> {} } );
-    //   test.execute( BytesPending { 0 } );
-    //   test.execute( BytesPushed { 0 } );
-    //   test.execute( SegmentArrives {}.with_fin().with_seqno( 893475 ).without_ackno() );
-    //   test.execute( ExpectAckno { std::optional<Wrap32> {} } );
-    //   test.execute( BytesPending { 0 } );
-    //   test.execute( BytesPushed { 0 } );
-    // }
+    {
+      TCPReceiverTestHarness test { "connect 4", 5435 };
+      test.execute( ExpectAckno { std::optional<Wrap32> {} } );
+      test.execute( BytesPending { 0 } );
+      test.execute( BytesPushed { 0 } );
+      test.execute( SegmentArrives {}.with_fin().with_seqno( 893475 ).without_ackno() );
+      test.execute( ExpectAckno { std::optional<Wrap32> {} } );
+      test.execute( BytesPending { 0 } );
+      test.execute( BytesPushed { 0 } );
+    }
 
-    // {
-    //   TCPReceiverTestHarness test { "connect 5", 5435 };
-    //   test.execute( ExpectAckno { std::optional<Wrap32> {} } );
-    //   test.execute( BytesPending { 0 } );
-    //   test.execute( BytesPushed { 0 } );
-    //   test.execute( SegmentArrives {}.with_fin().with_seqno( 893475 ).without_ackno() );
-    //   test.execute( ExpectAckno { std::optional<Wrap32> {} } );
-    //   test.execute( BytesPending { 0 } );
-    //   test.execute( BytesPushed { 0 } );
-    //   test.execute( SegmentArrives {}.with_syn().with_seqno( 89347598 ) );
-    //   test.execute( ExpectAckno { Wrap32 { 89347599 } } );
-    //   test.execute( BytesPending { 0 } );
-    //   test.execute( BytesPushed { 0 } );
-    // }
+    {
+      TCPReceiverTestHarness test { "connect 5", 5435 };
+      test.execute( ExpectAckno { std::optional<Wrap32> {} } );
+      test.execute( BytesPending { 0 } );
+      test.execute( BytesPushed { 0 } );
+      test.execute( SegmentArrives {}.with_fin().with_seqno( 893475 ).without_ackno() );
+      test.execute( ExpectAckno { std::optional<Wrap32> {} } );
+      test.execute( BytesPending { 0 } );
+      test.execute( BytesPushed { 0 } );
+      test.execute( SegmentArrives {}.with_syn().with_seqno( 89347598 ) );
+      test.execute( ExpectAckno { Wrap32 { 89347599 } } );
+      test.execute( BytesPending { 0 } );
+      test.execute( BytesPushed { 0 } );
+    }
 
     {
       TCPReceiverTestHarness test { "connect 6", 4000 };
