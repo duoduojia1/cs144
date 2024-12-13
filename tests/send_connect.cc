@@ -81,7 +81,7 @@ int main()
       test.execute( ExpectSeqnosInFlight { 8 } );
       test.execute( AckReceived { isn + 9 } );
       test.execute( ExpectNoSegment {} );
-      test.execute( ExpectSeqnosInFlight { 0 } );
+      test.execute( ExpectSeqnosInFlight { 0 } ); 
       test.execute( ExpectSeqno { isn + 9 } );
     }
 

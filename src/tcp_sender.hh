@@ -16,8 +16,7 @@ class TCPSender
 public:
   /* Construct TCP sender with given default Retransmission Timeout and possible ISN */
   TCPSender( ByteStream&& input, Wrap32 isn, uint64_t initial_RTO_ms )
-    : input_( std::move( input ) ), isn_( isn ), initial_RTO_ms_( initial_RTO_ms ), 
- next_accpet_senum_(0) {}
+    : input_( std::move( input ) ), isn_( isn ), initial_RTO_ms_( initial_RTO_ms ) {}
 
   /* Generate an empty TCPSenderMessage */
   TCPSenderMessage make_empty_message() const;
@@ -47,7 +46,7 @@ private:
   // Variables initialized in constructor
   bool is_syn_{};
   bool is_fin_{};
-  Wrap32 next_accpet_senum_;// 这个是收到的ack表示期望收到的下一个序号。
+  uint64_t next_accpet_senum_{};// 这个是收到的ack表示期望收到的下一个序号。
   uint64_t abs_seqno_{}; //下一个该发送的序号..(之前都已经发了, 但是不一定收到了)
   uint64_t total_outstanding_{};
   uint64_t window_size_{};
