@@ -17,12 +17,13 @@ uint64_t TCPSender::consecutive_retransmissions() const
 
 void TCPSender::push( const TransmitFunction& transmit )
 {
+  if( end_ ) return; //防止结束后，又push
   // Your code here.
   if( input_.writer().is_closed() ) {
-      is_fin_ = true;//应该是writer不在写了..
+      is_fin_ = true;//应该是writer不在写了.. //代表已经fin过了，只要最后fin的ack到了，那么结束了。
     }
   uint64_t cal_window_size_ = ( window_size_ == 0 ? 1 : window_size_ );
-  while( cal_window_size_ - total_outstanding_ > 0 ){
+  while( cal_window_size_ - total_outstanding_ > 0 ) {
     TCPSenderMessage&& msg = make_empty_message();
     if( not is_syn_ ) {
       is_syn_ = true;
@@ -31,8 +32,11 @@ void TCPSender::push( const TransmitFunction& transmit )
       wait_ack_que_.push( {msg, 0UL} );//因为这个一定是ack握手。
       abs_seqno_ += msg.sequence_length();
       total_outstanding_ += msg.sequence_length(); //syn 也是得有ack的。
-      //break;
-      //其实没东西传也能break, 因为下面会有break逻辑
+      if( is_fin_ ) end_ = abs_seqno_; //这里是最终结束点
+      if( msg.FIN ){//跟下面一样了，握手和发实际消息，两套逻辑。
+        is_fin_ = false; //这里有点问题，得确认fin收到了，才能置为false。但是队列是拷贝了一份变量的，好像无所谓
+        break;
+      }
     }
     //必须要握手成功了，才可以进行发送消息
     if( next_accpet_senum_ > 0UL ){
@@ -43,12 +47,15 @@ void TCPSender::push( const TransmitFunction& transmit )
         msg.payload += std::string( input_.reader().peek() );
         input_.reader().pop( 1UL ); //把内容都读出来..
       }
-      abs_seqno_ += msg.sequence_length() + ( is_fin_ ? 1UL : 0UL );
-      total_outstanding_ += msg.sequence_length() + ( is_fin_ ? 1UL : 0UL);
-      msg.FIN = (is_fin_ ? true : false);
+      abs_seqno_ += msg.sequence_length(); //+ ( is_fin_ ? 1UL : 0UL );fin的值已经算进去，下面也一样
+      total_outstanding_ += msg.sequence_length(); //+ ( is_fin_ ? 1UL : 0UL);
+      if( is_fin_ ) end_ = abs_seqno_; //跟上面同理。
       transmit( msg );
       wait_ack_que_.push( { msg, abs_seqno_ - msg.sequence_length() } );
-      if( msg.FIN ) break; //如果已经发完断开信号，就能break了。
+      if( msg.FIN ){
+        is_fin_ = false; //这里有点问题，得确认fin收到了，才能置为false。但是队列是拷贝了一份变量的，好像无所谓
+        break;
+      } //如果已经发完断开信号，就能break了。
     }
   } 
   // (void)transmit;
@@ -65,8 +72,12 @@ void TCPSender::receive( const TCPReceiverMessage& msg )
   // Your code here.
   if( msg.ackno.has_value() ){
     auto ack = msg.ackno.value().unwrap( isn_, checkpoint_ );
-    if( ack < next_accpet_senum_  || not ack ) return; //ack一定比之前的akc要更新，不能说拿旧的ack来更新窗口。或者就是一个错误的消息
-    //比如是0，因为期望的ack至少是1，不然不更新窗口。这里有点隐患。
+    if( ack < next_accpet_senum_ || (!ack && is_syn_) || ack > abs_seqno_ ) return; //ack一定比之前的akc要更新，不能说拿旧的ack来更新窗口。或者就是一个错误的消息
+    //比如是0，因为期望的ack至少是1，不然不更新窗口。不能说ack比我发出去的还要大。如果已经连接了，就不能只接受为0的ack
+    if( ack > next_accpet_senum_) { //保证要是新数据才能reset   
+        Timer_.clear();
+        retransmissions = 0;
+    }
     this->window_size_ = msg.window_size;
     this->next_accpet_senum_ = ack;
     // 判断一下需要出队的是哪一些已经发送的消息..,干脆加的时候，记一下绝对序列号。
@@ -76,8 +87,7 @@ void TCPSender::receive( const TCPReceiverMessage& msg )
     }
     //total_outstanding_ -= ( ack - 1UL );
     // 判断一下是收到ack就算是可以重置计数器，还是说必须收到准确的ack才能重置计时器?
-    Timer_.clear();
-    retransmissions = 0;
+
 
     total_outstanding_ = abs_seqno_ - ack; //取差值就是还未收到ack的序列。
     checkpoint_ = msg.ackno.value().unwrap( isn_, checkpoint_ ); 
