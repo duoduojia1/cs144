@@ -11,13 +11,43 @@
 #include <optional>
 #include <queue>
 
+
+
+struct wait_message {
+  TCPSenderMessage  msg_;// 记录消息。
+  uint64_t abs_head_;
+};
+
+class RetransmissionTimer
+{
+  public: 
+    explicit RetransmissionTimer( uint64_t initial_RTO_ms ) : RTO_ms_( initial_RTO_ms )
+    ,initial_{ initial_RTO_ms } {}
+    constexpr auto is_active() -> bool { return is_active_; }
+    constexpr auto is_expired() ->bool { return is_active_ and timer_ >= RTO_ms_; }
+    constexpr auto reset() -> void { timer_ = 0; }
+    constexpr auto clear() -> void { timer_ = 0, RTO_ms_ = initial_; }//收到ack后一定要重置一下计时器 
+    constexpr auto exponent_backoff() -> void { RTO_ms_ *= 2; }
+    constexpr auto start() ->void { is_active_ = true, reset(); }
+    constexpr auto stop() -> void { is_active_ = false , reset(); }
+    constexpr auto tick(uint64_t ms_since_last_tick ) -> RetransmissionTimer&
+    {
+      timer_ += is_active_ ? ms_since_last_tick : 0;
+      return *this;
+    }
+  private:
+    bool is_active_ {};
+    uint64_t RTO_ms_; //编译器不允许没法使用的值，我干脆绑定原先类的值就好了。
+    uint64_t initial_;
+    uint64_t timer_ {};
+};
 class TCPSender
 {
 public:
   /* Construct TCP sender with given default Retransmission Timeout and possible ISN */
   TCPSender( ByteStream&& input, Wrap32 isn, uint64_t initial_RTO_ms )
-    : input_( std::move( input ) ), isn_( isn ), initial_RTO_ms_( initial_RTO_ms ) {}
-
+    : input_( std::move( input ) ), isn_( isn ), initial_RTO_ms_( initial_RTO_ms ), Timer_( initial_RTO_ms_ ){}
+    //这里为什么用this，就是希望它绑定到的值是成员变量，而不是形参。
   /* Generate an empty TCPSenderMessage */
   TCPSenderMessage make_empty_message() const;
 
@@ -51,7 +81,12 @@ private:
   uint64_t total_outstanding_{};
   uint64_t window_size_{};
   uint64_t checkpoint_{};
+  uint64_t retransmissions {};//用来计算重传次数。
   ByteStream input_;
   Wrap32 isn_;
-  uint64_t initial_RTO_ms_;
+  uint64_t initial_RTO_ms_; 
+  std::queue<wait_message>  wait_ack_que_{};
+  //好像每次只重传第一个段？
+  RetransmissionTimer Timer_;
+  //这个就是为了等待ack到来，判断计时用的，每次只需要从头pop即可。
 };
