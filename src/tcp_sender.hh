@@ -27,7 +27,7 @@ class RetransmissionTimer
     constexpr auto is_expired() ->bool { return is_active_ and timer_ >= RTO_ms_; }
     constexpr auto reset() -> void { timer_ = 0; }
     constexpr auto clear() -> void { timer_ = 0, RTO_ms_ = initial_; }//收到ack后一定要重置一下计时器 
-    constexpr auto exponent_backoff() -> void { RTO_ms_ *= 2; }
+    constexpr auto exponential_backoff() -> void { RTO_ms_ *= 2; }
     constexpr auto start() ->void { is_active_ = true, reset(); }
     constexpr auto stop() -> void { is_active_ = false , reset(); }
     constexpr auto tick(uint64_t ms_since_last_tick ) -> RetransmissionTimer&
@@ -76,7 +76,6 @@ private:
   // Variables initialized in constructor
   bool is_syn_{};
   bool is_fin_{};
-  uint64_t end_{};//引入这个是因为，它最后收到fin信号的时候又push了，我又发了一次消息。。。
   uint64_t next_accpet_senum_{ };// 这个是收到的ack表示期望收到的下一个序号。
   uint64_t abs_seqno_{}; //下一个该发送的序号..(之前都已经发了, 但是不一定收到了)
   uint64_t total_outstanding_{};
