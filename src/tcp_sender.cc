@@ -161,5 +161,7 @@ void TCPSender::tick( uint64_t ms_since_last_tick, const TransmitFunction& trans
 }
 
 
-//记住，它这个close，实际上push了一个fin信号
-//好像
+
+
+//不知道为什么要给fin单独留一个窗口。
+//为什么只有窗口 ！=0 时候才能翻倍它的窗口。
