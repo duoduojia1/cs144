@@ -3,6 +3,7 @@
 #include <queue>
 #include <unordered_map>
 #include <set>
+#include <map>
 #include "address.hh"
 #include "ethernet_frame.hh"
 #include "ipv4_datagram.hh"
@@ -28,6 +29,8 @@
 // the network interface passes it up the stack. If it's an ARP
 // request or reply, the network interface processes the frame
 // and learns or replies as necessary.
+
+
 class Cal_time
 {
   public:
@@ -95,9 +98,10 @@ private:
   Address ip_address_;
   Cal_time timer_;
   // Datagrams that have been received
+  std::unordered_map<uint32_t, std::vector<InternetDatagram>> broad_wait_{};
   std::queue<InternetDatagram> datagrams_received_ {};
   std::unordered_map<uint32_t, EthernetAddress> arp_table_{};
   std::set<uint32_t> wait_set{};//这个是存发送广播地址后，但是还不知道对方的mac地址是多少
   std::unordered_map<uint32_t, size_t> time_stamp_{};//存广播之后的时间戳
-  std::unordered_map<uint32_t, size_t> arp_table_time_{} //记录每一个arp上的ip地址映射的时间
+  std::map<uint32_t, size_t> arp_table_time_{}; //记录每一个arp上的ip地址映射的时间
 };
