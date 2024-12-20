@@ -36,7 +36,10 @@ void Router::route()
     while( !q.empty() ) {
       const uint32_t& dst =  q.front().header.dst;
       uint8_t& ttl = q.front().header.ttl;
-      if( !ttl ) continue;
+      if( !ttl ){
+        q.pop();
+         continue;
+      }
       //match
       uint8_t record_max_len = 0;
       uint32_t record_index = 0;
@@ -54,10 +57,19 @@ void Router::route()
             }
           } //如果匹配成功
       }
-      if( !match_flag ) continue;
+      if( !match_flag ){
+        q.pop();
+        continue;
+      }
       ttl -= 1;
-      if( !ttl ) continue;
-      _interfaces[ router_table_[record_index].interface_num ]->send_datagram( q.front(), Address::from_ipv4_numeric( dst ));
+      if( !ttl ){
+        q.pop();
+        continue;
+      } 
+      if( router_table_[ record_index ].next_hop.has_value() ){
+          _interfaces[ router_table_[record_index].interface_num ]->send_datagram( q.front(), Address::from_ipv4_numeric( router_table_[ record_index ].next_hop.value() ));
+      }
+      else  _interfaces[ router_table_[record_index].interface_num ]->send_datagram( q.front(), Address::from_ipv4_numeric( dst ));
       q.pop();
     }
   }
